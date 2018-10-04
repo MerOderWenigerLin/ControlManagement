@@ -3,11 +3,6 @@ using UnityEngine.SceneManagement;
 
 public class PlayerControl : PhysicalObject
 {
-    public float moveSpeed = 5F;
-    public float jumpStrength = 5F;
-
-    private Rigidbody2D _rigidbody;
-    private bool _isJumping;
     private float _oldJumpingVelocity;
 
     public bool controlIsPressed(Control control)
@@ -18,44 +13,36 @@ public class PlayerControl : PhysicalObject
     private void checkMovementInput()
     {
         if (controlIsPressed(Control.MoveLeft))
-            _rigidbody.velocity = new Vector3(moveSpeed * -1, _rigidbody.velocity.y);
+            moveLeft();
         else if (controlIsPressed(Control.MoveRight))
-            _rigidbody.velocity = new Vector3(moveSpeed, _rigidbody.velocity.y);
+            moveRight();
         else
-            _rigidbody.velocity = new Vector3(0, _rigidbody.velocity.y);
+            stopMovement();            
     }
 
     private void checkJumpingInput()
     {
         if (controlIsPressed(Control.Jump))
-        {
-            if (!_isJumping && isGrounded())
-            {
-                _isJumping = true;
-                _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, jumpStrength, 0);
-            }
-            if (_isJumping)
-                _rigidbody.AddForce(Vector2.up * jumpStrength * Time.deltaTime * 50);
-        }
-        else if (_rigidbody.velocity.y <= 0)
-            _isJumping = false;
+            startJumping();
+        else if (Body.velocity.y <= 0)
+            stopJumping();
     }
 
     private void checkInputs()
     {
         checkMovementInput();
         checkJumpingInput();
-        if(transform.position.y < 0)
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     /// <summary>
     /// Update is called every frame, if the MonoBehaviour is enabled.
     /// </summary>
-    void Update()
+    public void Update()
     {
+        processPhysics();
         checkInputs();
-        isGrounded();
+        if (transform.position.y < 0)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     /// <summary>
@@ -64,7 +51,6 @@ public class PlayerControl : PhysicalObject
     /// </summary>
     void Start()
     {
-        _rigidbody = gameObject.GetComponent<Rigidbody2D>();
-        _rigidbody.freezeRotation = true;
+        Body.freezeRotation = true;
     }
 }
