@@ -22,6 +22,7 @@ public class PhysicalObject : MonoBehaviour
             return _rigidbody;
         }
     }
+    protected Vector2 Velocity { get { return Body.velocity; } set { Body.velocity = value; } }
 
     public bool isGrounded(float posXOffset)
     {
@@ -45,17 +46,17 @@ public class PhysicalObject : MonoBehaviour
 
     public void moveLeft()
     {
-        Body.velocity = new Vector3(moveSpeed * -1, Body.velocity.y);
+        Velocity = new Vector3(moveSpeed * -1, Velocity.y);
     }
 
     public void moveRight()
     {
-        Body.velocity = new Vector3(moveSpeed, Body.velocity.y);
+        Velocity = new Vector3(moveSpeed, Velocity.y);
     }
 
     public void stopMovement()
     {
-        Body.velocity = new Vector3(0, Body.velocity.y);
+        Velocity = new Vector3(0, Velocity.y);
     }
 
     public void startJumping()
@@ -63,7 +64,7 @@ public class PhysicalObject : MonoBehaviour
         if (!_isJumping && isGrounded())
         {
             _isJumping = true;
-            Body.velocity = new Vector3(Body.velocity.x, jumpStrength, 0);
+            Velocity = new Vector3(Velocity.x, jumpStrength, 0);
         }
         if (_isJumping)
             Body.AddForce(Vector2.up * jumpStrength * Time.deltaTime * 50);
