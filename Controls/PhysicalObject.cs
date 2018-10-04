@@ -75,11 +75,6 @@ public class PhysicalObject : MonoBehaviour
         _isJumping = false;
     }
 
-    public void processPhysics()
-    {
-
-    }
-
     private bool isGroundedLeft()
     {
         return isGrounded((_colliderRect.width / 2 * -1) + rayCastOffset);
@@ -88,6 +83,27 @@ public class PhysicalObject : MonoBehaviour
     private bool isGroundedRight()
     {
         return isGrounded(_colliderRect.width / 2 - rayCastOffset);
+    }
+
+    protected virtual void processMovement()
+    {
+
+    }
+
+    protected virtual void processPhysics()
+    {
+
+    }
+
+    void Update()
+    {
+        processMovement();
+        processPhysics();
+    }
+
+    void Start()
+    {
+        Body.freezeRotation = true;
     }
 
 }
