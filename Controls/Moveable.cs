@@ -1,7 +1,7 @@
 using Unity2DBasics;
 using UnityEngine;
 
-public class MoveableObject : PhysicalObject
+public class Moveable : Physical
 {
     public float moveSpeed = 5F;
     public float jumpStrength = 7F;

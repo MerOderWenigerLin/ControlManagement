@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PlayerControl : MoveableObject
+public class Player : Moveable
 {
     private float _oldJumpingVelocity;
 

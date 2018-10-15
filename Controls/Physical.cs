@@ -1,7 +1,7 @@
 using Unity2DBasics;
 using UnityEngine;
 
-public class PhysicalObject : MonoBehaviour
+public class Physical : MonoBehaviour
 {
     public bool debug;    
 
