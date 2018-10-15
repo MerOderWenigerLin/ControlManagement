@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Physical : MonoBehaviour
 {
-    public bool debug;    
+    public bool debug;
 
     private const float rayCastOffset = 0.025f;
     private Rect _colliderRect;
@@ -19,31 +19,16 @@ public class Physical : MonoBehaviour
     }
     protected Vector2 Velocity { get { return Body.velocity; } set { Body.velocity = value; } }
 
-    public bool isGrounded(Vector2 rayCastOrigin)
+    protected virtual void Update()
     {
-        RaycastHit2D hit = Physics2D.Raycast(rayCastOrigin, Vector2.down, rayCastOffset);
-        if (debug && hit)
-            Debug.Log(hit.transform);
-        return hit && hit.collider != transform.GetComponent<BoxCollider2D>();
+        _colliderRect = BoxCollider2DHelper.toRect(GetComponent<BoxCollider2D>());
+        processPhysics();
     }
 
-    public bool isGrounded()
+    protected virtual void Start()
     {
-        return isGrounded(getBottomLeft()) || isGrounded(getBottomRight());
-    }  
-
-    private Vector2 getBottomLeft()
-    {
-        float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
-        Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + (_colliderRect.width / 2 * -1) + rayCastOffset, rayCastOriginPosY);
-        return rayCastOrigin;
-    }
-
-    private Vector2 getBottomRight()
-    {
-        float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
-        Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + _colliderRect.width / 2 - rayCastOffset, rayCastOriginPosY);
-        return rayCastOrigin;
+        //Time.timeScale = 0.1F;
+        Body.freezeRotation = true;
     }
 
     protected virtual void processPhysics()
@@ -60,16 +45,30 @@ public class Physical : MonoBehaviour
         }
     }
 
-    protected virtual void Update()
+    protected bool isGrounded()
     {
-        _colliderRect = BoxCollider2DHelper.toRect(GetComponent<BoxCollider2D>());        
-        processPhysics();
+        return isGrounded(getBottomLeft()) || isGrounded(getBottomRight());
     }
 
-    void Start()
+    private bool isGrounded(Vector2 rayCastOrigin)
     {
-        //Time.timeScale = 0.1F;
-        Body.freezeRotation = true;
+        RaycastHit2D hit = Physics2D.Raycast(rayCastOrigin, Vector2.down, rayCastOffset);
+        if (debug && hit)
+            Debug.Log(hit.transform);
+        return hit && hit.collider != transform.GetComponent<BoxCollider2D>();
     }
 
+    private Vector2 getBottomLeft()
+    {
+        float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
+        Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + (_colliderRect.width / 2 * -1) + rayCastOffset, rayCastOriginPosY);
+        return rayCastOrigin;
+    }
+
+    private Vector2 getBottomRight()
+    {
+        float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
+        Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + _colliderRect.width / 2 - rayCastOffset, rayCastOriginPosY);
+        return rayCastOrigin;
+    }
 }
