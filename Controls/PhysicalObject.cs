@@ -3,12 +3,7 @@ using UnityEngine;
 
 public class PhysicalObject : MonoBehaviour
 {
-    public bool debug;
-
-    public float moveSpeed = 5F;
-    public float jumpStrength = 7F;
-
-    private bool _isJumping;
+    public bool debug;    
 
     private const float rayCastOffset = 0.025f;
     private Rect _colliderRect;
@@ -35,38 +30,7 @@ public class PhysicalObject : MonoBehaviour
     public bool isGrounded()
     {
         return isGrounded(getBottomLeft()) || isGrounded(getBottomRight());
-    }
-
-    public void moveLeft()
-    {
-        Velocity = new Vector3(moveSpeed * -1, Velocity.y);
-    }
-
-    public void moveRight()
-    {
-        Velocity = new Vector3(moveSpeed, Velocity.y);
-    }
-
-    public void stopMovement()
-    {
-        Velocity = new Vector3(0, Velocity.y);
-    }
-
-    public void startJumping()
-    {
-        if (!_isJumping && isGrounded())
-        {
-            _isJumping = true;
-            Velocity = new Vector3(Velocity.x, jumpStrength, 0);
-        }
-        if (_isJumping)
-            Body.AddForce(Vector2.up * jumpStrength * Time.deltaTime * 50);
-    }
-
-    public void stopJumping()
-    {
-        _isJumping = false;
-    }
+    }  
 
     private Vector2 getBottomLeft()
     {
@@ -80,11 +44,6 @@ public class PhysicalObject : MonoBehaviour
         float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
         Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + _colliderRect.width / 2 - rayCastOffset, rayCastOriginPosY);
         return rayCastOrigin;
-    }
-
-    protected virtual void processMovement()
-    {
-
     }
 
     protected virtual void processPhysics()
@@ -101,10 +60,9 @@ public class PhysicalObject : MonoBehaviour
         }
     }
 
-    void Update()
+    protected virtual void Update()
     {
-        _colliderRect = BoxCollider2DHelper.toRect(GetComponent<BoxCollider2D>());
-        processMovement();
+        _colliderRect = BoxCollider2DHelper.toRect(GetComponent<BoxCollider2D>());        
         processPhysics();
     }
 

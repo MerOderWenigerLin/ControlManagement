@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PlayerControl : PhysicalObject
+public class PlayerControl : MoveableObject
 {
     private float _oldJumpingVelocity;
 
@@ -24,7 +24,7 @@ public class PlayerControl : PhysicalObject
     {
         if (controlIsPressed(Control.Jump))
             startJumping();
-        else if (Body.velocity.y <= 0)
+        else if (Velocity.y <= 0)
             stopJumping();
     }
 
