@@ -4,19 +4,12 @@ using UnityEngine;
 public class Physical : MonoBehaviour
 {
     public bool debug;
+    public float mass = 1;
 
     private const float rayCastOffset = 0.025f;
     private Rect _colliderRect;
     private Rigidbody2D _rigidbody;
-    protected Rigidbody2D Body
-    {
-        get
-        {
-            if (_rigidbody == null)
-                _rigidbody = gameObject.GetComponent<Rigidbody2D>();
-            return _rigidbody;
-        }
-    }
+    protected Rigidbody2D Body { get { return _rigidbody; } }
     protected Vector2 Velocity { get { return Body.velocity; } set { Body.velocity = value; } }
 
     protected virtual void Update()
@@ -27,13 +20,26 @@ public class Physical : MonoBehaviour
 
     protected virtual void Start()
     {
-        //Time.timeScale = 0.1F;
+        initializeComponents();
         Body.freezeRotation = true;
+    }
+
+    protected virtual void initializeComponents()
+    {
+        _rigidbody = gameObject.GetComponent<Rigidbody2D>();
+        if (_rigidbody == null)
+        {
+            _rigidbody = gameObject.AddComponent<Rigidbody2D>();
+            _rigidbody.gravityScale = 3;
+            _rigidbody.mass = this.mass;
+        }
     }
 
     protected virtual void processPhysics()
     {
-        Vector2 predictedPosition = new Vector2(_colliderRect.x, _colliderRect.yMin + Velocity.y * Time.deltaTime);
+        Vector2 nextBottomLeft = getNextPosition(getBottomLeft());
+        Vector2 nextBottomRight = getNextPosition(getBottomRight());
+        RaycastHit2D hit1 = Physics2D.Raycast(getBottomLeft(), getNextPosition(getBottomLeft()));
         //DebugHelper.drawPoint(predictedPosition, Color.cyan);
         if (debug)
         {
@@ -41,7 +47,9 @@ public class Physical : MonoBehaviour
             Vector2 bottomRight = getBottomRight();
             DebugHelper.drawPoint(bottomLeft, Color.magenta);
             DebugHelper.drawPoint(bottomRight, Color.magenta);
-            DebugHelper.drawRectPoints(_colliderRect, Color.blue);
+            DebugHelper.drawPoint(nextBottomLeft, Color.yellow);
+            DebugHelper.drawPoint(nextBottomRight, Color.yellow);
+            DebugHelper.drawRectPoints(_colliderRect, Color.red);
         }
     }
 
@@ -70,5 +78,15 @@ public class Physical : MonoBehaviour
         float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
         Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + _colliderRect.width / 2 - rayCastOffset, rayCastOriginPosY);
         return rayCastOrigin;
+    }
+
+    private Vector2 getNextPosition(Vector2 startPosition)
+    {
+        return new Vector2(startPosition.x + Velocity.x * Time.deltaTime, startPosition.y + Velocity.y * Time.deltaTime);
+    }
+
+    private Vector2 getNextPosition(float x, float y)
+    {
+        return getNextPosition(new Vector2(x, y));
     }
 }
