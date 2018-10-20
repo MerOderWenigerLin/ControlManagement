@@ -38,32 +38,35 @@ public class Physical : MonoBehaviour
 
     protected virtual void processPhysics()
     {
-        if (isGrounded())
-            return;
+        correctPosition(getBottomLeft());
+        correctPosition(getBottomRight());
+    }
 
-        Vector2 bottomLeft = getBottomLeft();
-        Vector2 nextBottomLeft = getNextPosition(bottomLeft);
-
-        Vector2 heading = nextBottomLeft - bottomLeft;
+    protected void correctPosition(Vector2 position)
+    {
+        Vector2 heading = getNextPosition(position) - position;
         float distance = heading.magnitude;
-        Vector2 direction = heading / distance;
-
-        RaycastHit2D hit1 = Physics2D.Raycast(bottomLeft, direction, distance);
-        if (hit1 && hit1.collider != transform.GetComponent<BoxCollider2D>())
+        if (distance > 0)
         {
-            Velocity = new Vector2();
-            transform.position = new Vector2(transform.position.x, transform.position.y) + (direction * hit1.distance);
+            Vector2 direction = heading / distance;
+            RaycastHit2D hit1 = Physics2D.Raycast(position + direction * rayCastOffset, direction, distance);
+            if (hit1 && hit1.collider != transform.GetComponent<BoxCollider2D>())
+            {
+                Velocity = new Vector2();
+                if (hit1.distance > 0)
+                    transform.position = new Vector2(transform.position.x, transform.position.y) + (direction * hit1.distance);
+            }
         }
     }
 
     protected bool isGrounded()
     {
-        return isGrounded(getBottomLeft()) || isGrounded(getBottomRight());
+        return willCollide(getBottomLeft(), Vector2.down) || willCollide(getBottomRight(), Vector2.down);
     }
 
-    private bool isGrounded(Vector2 rayCastOrigin)
+    protected bool willCollide(Vector2 startPosition, Vector2 direction)
     {
-        RaycastHit2D hit = Physics2D.Raycast(rayCastOrigin, Vector2.down, rayCastOffset);
+        RaycastHit2D hit = Physics2D.Raycast(startPosition + direction * rayCastOffset, direction, rayCastOffset);
         if (debug && hit)
             Debug.Log(hit.transform);
         return hit && hit.collider != transform.GetComponent<BoxCollider2D>();
@@ -71,14 +74,14 @@ public class Physical : MonoBehaviour
 
     private Vector2 getBottomLeft()
     {
-        float y = _colliderRect.yMin - rayCastOffset;
+        float y = _colliderRect.yMin;
         float x = _colliderRect.center.x + (_colliderRect.width / 2 * -1);
         return new Vector2(x, y);
     }
 
     private Vector2 getBottomRight()
     {
-        float y = _colliderRect.yMin - rayCastOffset;
+        float y = _colliderRect.yMin;
         float x = _colliderRect.center.x + _colliderRect.width / 2;
         return new Vector2(x, y);
     }
