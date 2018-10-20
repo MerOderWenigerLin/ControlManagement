@@ -22,6 +22,7 @@ public class Physical : MonoBehaviour
     {
         initializeComponents();
         Body.freezeRotation = true;
+        //Time.timeScale = 0.05F;
     }
 
     protected virtual void initializeComponents()
@@ -37,19 +38,21 @@ public class Physical : MonoBehaviour
 
     protected virtual void processPhysics()
     {
-        Vector2 nextBottomLeft = getNextPosition(getBottomLeft());
-        Vector2 nextBottomRight = getNextPosition(getBottomRight());
-        RaycastHit2D hit1 = Physics2D.Raycast(getBottomLeft(), getNextPosition(getBottomLeft()));
-        //DebugHelper.drawPoint(predictedPosition, Color.cyan);
-        if (debug)
+        if (isGrounded())
+            return;
+
+        Vector2 bottomLeft = getBottomLeft();
+        Vector2 nextBottomLeft = getNextPosition(bottomLeft);
+
+        Vector2 heading = nextBottomLeft - bottomLeft;
+        float distance = heading.magnitude;
+        Vector2 direction = heading / distance;
+
+        RaycastHit2D hit1 = Physics2D.Raycast(bottomLeft, direction, distance);
+        if (hit1 && hit1.collider != transform.GetComponent<BoxCollider2D>())
         {
-            Vector2 bottomLeft = getBottomLeft();
-            Vector2 bottomRight = getBottomRight();
-            DebugHelper.drawPoint(bottomLeft, Color.magenta);
-            DebugHelper.drawPoint(bottomRight, Color.magenta);
-            DebugHelper.drawPoint(nextBottomLeft, Color.yellow);
-            DebugHelper.drawPoint(nextBottomRight, Color.yellow);
-            DebugHelper.drawRectPoints(_colliderRect, Color.red);
+            Velocity = new Vector2();
+            transform.position = new Vector2(transform.position.x, transform.position.y) + (direction * hit1.distance);
         }
     }
 
@@ -68,21 +71,21 @@ public class Physical : MonoBehaviour
 
     private Vector2 getBottomLeft()
     {
-        float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
-        Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + (_colliderRect.width / 2 * -1) + rayCastOffset, rayCastOriginPosY);
-        return rayCastOrigin;
+        float y = _colliderRect.yMin - rayCastOffset;
+        float x = _colliderRect.center.x + (_colliderRect.width / 2 * -1);
+        return new Vector2(x, y);
     }
 
     private Vector2 getBottomRight()
     {
-        float rayCastOriginPosY = _colliderRect.yMin - rayCastOffset;
-        Vector2 rayCastOrigin = new Vector2(_colliderRect.center.x + _colliderRect.width / 2 - rayCastOffset, rayCastOriginPosY);
-        return rayCastOrigin;
+        float y = _colliderRect.yMin - rayCastOffset;
+        float x = _colliderRect.center.x + _colliderRect.width / 2;
+        return new Vector2(x, y);
     }
 
     private Vector2 getNextPosition(Vector2 startPosition)
     {
-        return new Vector2(startPosition.x + Velocity.x * Time.deltaTime, startPosition.y + Velocity.y * Time.deltaTime);
+        return new Vector2(startPosition.x, startPosition.y) + Velocity * Time.deltaTime;
     }
 
     private Vector2 getNextPosition(float x, float y)
